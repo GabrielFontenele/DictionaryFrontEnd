@@ -7,7 +7,6 @@ export const HomeContainer = styled.div`
   flex-direction: row;
   gap: 1rem;
   margin: 1.5rem;
-  align-items: center;
 
   @media (max-width: 768px) {
     flex-direction: column;
