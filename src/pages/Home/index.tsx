@@ -1,12 +1,14 @@
 import { HomeContainer, WordContent, WordText, Navigation } from './styles'
 import { WordList } from './components/WordList'
 import { Star } from 'phosphor-react'
-import { useContext, useEffect } from 'react'
+import { useContext, useEffect, useState } from 'react'
 import { WordsContext } from '../../contexts/WordsContext'
 import { useNavigate } from 'react-router-dom'
+import ReactAudioPlayer from 'react-audio-player'
 
 export function Home() {
-  const { bearerToken } = useContext(WordsContext)
+  const { bearerToken, wordDefinition, saveFavorite } = useContext(WordsContext)
+  const [meaningPosition, setMeaningPosition] = useState(0)
   const navigate = useNavigate()
 
   useEffect(() => {
@@ -15,28 +17,54 @@ export function Home() {
     }
   })
 
+  useEffect(() => {
+    setMeaningPosition(0)
+  }, [wordDefinition])
+
+  function handleMeaningPositionNext() {
+    const meaningPositionNext = meaningPosition + 1
+    if (wordDefinition?.meaning[meaningPositionNext])
+      setMeaningPosition(meaningPositionNext)
+  }
+
+  function handleMeaningPositionPrevious() {
+    const meaningPositionPrevious = meaningPosition - 1
+    if (wordDefinition?.meaning[meaningPositionPrevious])
+      setMeaningPosition(meaningPositionPrevious)
+  }
+
+  function handleSaveFavorite() {
+    saveFavorite()
+  }
+
   return (
     <HomeContainer>
       <WordContent>
-        <Star size={35} weight="light" />
+        {wordDefinition && wordDefinition?.favorite ? (
+          <Star
+            onClick={handleSaveFavorite}
+            size={35}
+            color="#a87010"
+            weight="fill"
+          />
+        ) : (
+          <Star onClick={handleSaveFavorite} size={35} />
+        )}
+
+        {wordDefinition?.favorite ? 'true' : 'false'}
         <WordText>
-          <span>hello</span>
-          <span>həˈloʊ</span>
+          <span>{wordDefinition?.word}</span>
+          <span>{wordDefinition?.phonetic}</span>
         </WordText>
 
-        <audio controls>
-          <source
-            src="https://api.dictionaryapi.dev/media/pronunciations/en/hello-uk.mp3"
-            // type="audio/mpeg"
-          />
-        </audio>
+        <ReactAudioPlayer src={wordDefinition?.audioUrl} autoPlay controls />
 
         <h2>Meanings</h2>
-        <p>verb - {`"Hello!" or an equivalent greeting.`}</p>
+        <p>{wordDefinition?.meaning[meaningPosition]}</p>
 
         <Navigation>
-          <button>Voltar</button>
-          <button>Próximo</button>
+          <button onClick={handleMeaningPositionPrevious}>Voltar</button>
+          <button onClick={handleMeaningPositionNext}>Próximo</button>
         </Navigation>
       </WordContent>
       <WordList />

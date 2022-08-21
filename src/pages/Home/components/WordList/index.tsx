@@ -10,8 +10,14 @@ import { WordsContext } from '../../../../contexts/WordsContext'
 import { useContext } from 'react'
 
 export function WordList() {
-  const { words, historic, favorites, fetchHistory, fetchFavorites } =
-    useContext(WordsContext)
+  const {
+    words,
+    historic,
+    favorites,
+    fetchHistory,
+    fetchFavorites,
+    fetchWord,
+  } = useContext(WordsContext)
 
   function handleFavorites() {
     fetchFavorites(1)
@@ -38,22 +44,34 @@ export function WordList() {
         <TabContents>
           <Tabs.Content value="tab1">
             <WordTable>
-              {words.map((word, key) => {
-                return <span key={key}>{word}</span>
+              {words?.words.map((word, key) => {
+                return (
+                  <span key={key} onClick={() => fetchWord(word)}>
+                    {word}
+                  </span>
+                )
               })}
             </WordTable>
           </Tabs.Content>
           <Tabs.Content value="tab2">
             <WordTable>
-              {historic.map((word, key) => {
-                return <span key={key}>{word}</span>
+              {historic?.words.map((word, key) => {
+                return (
+                  <span key={key} onClick={() => fetchWord(word)}>
+                    {word}
+                  </span>
+                )
               })}
             </WordTable>
           </Tabs.Content>
           <Tabs.Content value="tab3">
             <WordTable>
-              {favorites.map((word, key) => {
-                return <span key={key}>{word}</span>
+              {favorites?.words.map((word, key) => {
+                return (
+                  <span key={key} onClick={() => fetchWord(word)}>
+                    {word}
+                  </span>
+                )
               })}
             </WordTable>
           </Tabs.Content>

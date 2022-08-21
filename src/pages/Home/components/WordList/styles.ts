@@ -38,14 +38,18 @@ export const WordTable = styled.div`
   min-width: 25rem;
   max-width: 50rem;
   display: grid;
-  grid-template-columns: repeat(5, minmax(50px, 1fr));
+  grid-template-columns: repeat(4, minmax(min-content, 50px));
   border-top: 1px solid black;
   border-left: 1px solid black;
 
   span {
+    cursor: pointer;
     padding: 5px;
     text-align: center;
     border-bottom: 1px solid black;
     border-right: 1px solid black;
+    &:hover {
+      background-color: ${(props) => props.theme['gray-100']};
+    }
   }
 `

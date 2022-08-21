@@ -1,7 +1,6 @@
-import axios from 'axios'
 import { createContext, ReactNode, useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
 import { api } from '../lib/axios'
+import { WordResponse } from './WordResponseInterface'
 
 interface SigninInput {
   email: string
@@ -14,6 +13,19 @@ interface SignupInput {
   password: string
 }
 
+interface WordDefinition {
+  word: string
+  phonetic: string
+  meaning: string[]
+  audioUrl: string
+  favorite: boolean
+}
+
+interface pagination {
+  words: string[]
+  next: boolean
+}
+
 interface WordContextType {
   signin: (data: SigninInput) => Promise<boolean>
   signup: (data: SignupInput) => Promise<boolean>
@@ -21,10 +33,13 @@ interface WordContextType {
   searchWords: (query: string, page: number) => Promise<void>
   fetchHistory: (page: number) => Promise<void>
   fetchFavorites: (page: number) => Promise<void>
+  fetchWord: (query: string) => Promise<void>
+  saveFavorite: () => Promise<void>
   bearerToken: string | null
-  words: string[]
-  favorites: string[]
-  historic: string[]
+  words: pagination | null
+  favorites: pagination | null
+  historic: pagination | null
+  wordDefinition: WordDefinition | null
 }
 
 interface WordsProviderProps {
@@ -35,9 +50,14 @@ export const WordsContext = createContext({} as WordContextType)
 
 export function WordsProvider({ children }: WordsProviderProps) {
   const [bearerToken, setBearerToken] = useState<string | null>(null)
-  const [words, setWords] = useState<string[]>([])
-  const [favorites, setFavorites] = useState<string[]>([])
-  const [historic, setHistoric] = useState<string[]>([])
+
+  const [wordDefinition, setWordDefinition] = useState<WordDefinition | null>(
+    null,
+  )
+
+  const [words, setWords] = useState<pagination | null>(null)
+  const [favorites, setFavorites] = useState<pagination | null>(null)
+  const [historic, setHistoric] = useState<pagination | null>(null)
 
   useEffect(() => {
     const token = localStorage.getItem(
@@ -112,8 +132,11 @@ export function WordsProvider({ children }: WordsProviderProps) {
         headers: { Authorization: `bearer ${bearerToken}` },
       })
       .then((res) => {
-        console.log(res.data)
-        setWords(res.data.results)
+        const p: pagination = {
+          words: res.data.results,
+          next: res.data.hasNext,
+        }
+        setWords(p)
       })
   }
 
@@ -125,7 +148,12 @@ export function WordsProvider({ children }: WordsProviderProps) {
       })
       .then((res) => {
         const history = res.data.results.map((item: any) => item.word)
-        setHistoric(history)
+
+        const p: pagination = {
+          words: history,
+          next: res.data.hasNext,
+        }
+        setHistoric(p)
       })
   }
 
@@ -137,8 +165,88 @@ export function WordsProvider({ children }: WordsProviderProps) {
       })
       .then((res) => {
         const favorites = res.data.results.map((item: any) => item.word)
-        setFavorites(res.data.results)
+        const p: pagination = {
+          words: favorites,
+          next: res.data.hasNext,
+        }
+        setFavorites(p)
       })
+  }
+
+  async function fetchWord(query: string) {
+    api
+      .get('entries/en/' + query, {
+        headers: { Authorization: `bearer ${bearerToken}` },
+      })
+      .then((res) => {
+        const wordResponse = res.data[0] as WordResponse
+
+        const wordDefinition: WordDefinition = {
+          word: wordResponse.word,
+          phonetic: '',
+          meaning: [],
+          audioUrl: '',
+          favorite: false,
+        }
+
+        wordResponse.phonetics?.forEach((phonetic) => {
+          if (phonetic.audio) wordDefinition.audioUrl = phonetic.audio
+          if (phonetic.text) wordDefinition.phonetic = phonetic.text
+        })
+
+        wordResponse.meanings?.forEach((meaning) => {
+          meaning.definitions.forEach((definition) => {
+            wordDefinition.meaning.push(
+              `${meaning.partOfSpeech} - ${definition.definition}`,
+            )
+          })
+        })
+
+        favorites?.words.forEach((favorite) => {
+          if (wordResponse.word === favorite) wordDefinition.favorite = true
+        })
+
+        setWordDefinition(wordDefinition)
+      })
+  }
+
+  async function saveFavorite() {
+    if (wordDefinition) {
+      const word = wordDefinition.word
+      if (wordDefinition.favorite) {
+        api
+          .delete(`entries/en/${word}/unfavorite`, {
+            headers: { Authorization: `bearer ${bearerToken}` },
+          })
+          .then((res) => {
+            setWordDefinition((state) => {
+              if (state) {
+                return { ...state, favorite: false }
+              }
+              return null
+            })
+            fetchFavorites(1)
+          })
+      } else {
+        api
+          .post(
+            `entries/en/${word}/favorite`,
+            {},
+            {
+              headers: { Authorization: `bearer ${bearerToken}` },
+            },
+          )
+          .then((res) => {
+            setWordDefinition((state) => {
+              if (state) {
+                return { ...state, favorite: true }
+              }
+              return null
+            })
+            fetchFavorites(1)
+          })
+      }
+    }
   }
 
   return (
@@ -146,14 +254,17 @@ export function WordsProvider({ children }: WordsProviderProps) {
       value={{
         signin,
         signup,
-        searchWords,
-        bearerToken,
         signout,
+        searchWords,
+        fetchHistory,
+        fetchFavorites,
+        fetchWord,
+        saveFavorite,
+        bearerToken,
         words,
         favorites,
         historic,
-        fetchHistory,
-        fetchFavorites,
+        wordDefinition,
       }}
     >
       {children}

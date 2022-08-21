@@ -14,6 +14,7 @@ export const HomeContainer = styled.div`
 
   svg {
     margin-left: auto;
+    cursor: pointer;
   }
 `
 
