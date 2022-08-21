@@ -1,20 +1,41 @@
-import { HeaderContainer } from './styles'
-import { NavLink } from 'react-router-dom'
+import { HeaderContainer, Nav, NavLinkLeft, NavLinkRight } from './styles'
+import { NavLink, useNavigate } from 'react-router-dom'
+import { useContext } from 'react'
+import { WordsContext } from '../../contexts/WordsContext'
 
 export function Header() {
-  return (
-    <HeaderContainer>
-      <nav>
-        <NavLink to="" title="Home">
-          Home
-        </NavLink>
-        <NavLink to="/signin" title="Signin">
-          Signin
-        </NavLink>
-        <NavLink to="/signup" title="Signup">
-          Signup
-        </NavLink>
-      </nav>
-    </HeaderContainer>
-  )
+  const { bearerToken, signout } = useContext(WordsContext)
+
+  const navigate = useNavigate()
+
+  function handleSignout() {
+    signout()
+    navigate('/signin')
+  }
+
+  if (bearerToken) {
+    return (
+      <HeaderContainer>
+        <Nav variant="space">
+          <NavLinkLeft to="" title="Home">
+            Home
+          </NavLinkLeft>
+          <a onClick={handleSignout}>Sign out</a>
+        </Nav>
+      </HeaderContainer>
+    )
+  } else {
+    return (
+      <HeaderContainer>
+        <Nav variant="right">
+          <NavLink to="/signin" title="Signin">
+            Sign in
+          </NavLink>
+          <NavLink to="/signup" title="Signup">
+            Sign up
+          </NavLink>
+        </Nav>
+      </HeaderContainer>
+    )
+  }
 }

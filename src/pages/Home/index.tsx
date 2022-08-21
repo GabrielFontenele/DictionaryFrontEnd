@@ -1,8 +1,21 @@
 import { HomeContainer, WordContent, WordText, Navigation } from './styles'
 import { WordList } from './components/WordList'
 import { Star } from 'phosphor-react'
+import { useContext, useEffect } from 'react'
+import { WordsContext } from '../../contexts/WordsContext'
+import { useNavigate } from 'react-router-dom'
 
 export function Home() {
+  const { bearerToken } = useContext(WordsContext)
+  const navigate = useNavigate()
+
+  useEffect(() => {
+    if (!bearerToken) {
+      console.log(bearerToken)
+      navigate('/signin')
+    }
+  })
+
   return (
     <HomeContainer>
       <WordContent>

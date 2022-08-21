@@ -16,7 +16,8 @@ export const SignupContainer = styled.div`
   }
 `
 
-const BaseInput = styled.input`
+export const BaseInput = styled.input`
+  flex: 1;
   background: transparent;
   height: 2.5rem;
   border: 0;
@@ -34,29 +35,18 @@ const BaseInput = styled.input`
   &::placeholder {
     color: ${(props) => props.theme['gray-100']};
   }
-`
-
-export const EmailInput = styled(BaseInput)`
-  flex: 1;
 
   &::-webkit-calendar-picker-indicator {
     display: none !important;
   }
-`
-
-export const NameInput = styled(BaseInput)`
-  flex: 1;
-
-  &::-webkit-calendar-picker-indicator {
-    display: none !important;
-  }
-`
-
-export const PasswordInput = styled(BaseInput)`
-  flex: 1;
 `
 
 export const SignupButton = styled.button`
   flex: 1;
   margin-top: 1rem;
+`
+
+export const ErrorMessage = styled.p`
+  color: ${(props) => props.theme['red-500']};
+  font-weight: bold;
 `

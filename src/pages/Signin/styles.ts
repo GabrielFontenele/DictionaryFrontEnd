@@ -52,3 +52,8 @@ export const SigninButton = styled.button`
   flex: 1;
   margin-top: 1rem;
 `
+
+export const ErrorMessage = styled.p`
+  color: ${(props) => props.theme['red-500']};
+  font-weight: bold;
+`

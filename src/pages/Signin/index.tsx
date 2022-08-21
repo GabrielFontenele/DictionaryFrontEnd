@@ -1,5 +1,6 @@
 import {
   EmailInput,
+  ErrorMessage,
   PasswordInput,
   SigninButton,
   SigninContainer,
@@ -7,15 +8,21 @@ import {
 import * as zod from 'zod'
 import { FormProvider, useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
+import { useContext } from 'react'
+import { WordsContext } from '../../contexts/WordsContext'
+import { useNavigate } from 'react-router-dom'
 
 const newSigninFormValidationSchema = zod.object({
   email: zod.string().email('Email invalido').min(3),
-  password: zod.string().min(6),
+  password: zod.string().min(3),
 })
 
 type NewSigninFormData = zod.infer<typeof newSigninFormValidationSchema>
 
 export function Signin() {
+  const { signin } = useContext(WordsContext)
+  const navigate = useNavigate()
+
   const newSigninForm = useForm<NewSigninFormData>({
     resolver: zodResolver(newSigninFormValidationSchema),
     defaultValues: {
@@ -23,13 +30,23 @@ export function Signin() {
       password: '',
     },
   })
-  function handleLogin(data: NewSigninFormData) {
-    // login(data)
-    console.log(data)
-    reset()
-  }
 
-  const { handleSubmit, watch, reset, register } = newSigninForm
+  const {
+    handleSubmit,
+    register,
+    setError,
+    formState: { errors },
+  } = newSigninForm
+
+  async function handleLogin(data: NewSigninFormData) {
+    const logged = await signin(data)
+
+    if (logged) {
+      navigate('/')
+    } else {
+      setError('email', { type: 'custom', message: 'Email ou senha invalido' })
+    }
+  }
 
   return (
     <SigninContainer>
@@ -51,6 +68,7 @@ export function Signin() {
           />
 
           <SigninButton type="submit">Signin</SigninButton>
+          {errors.email && <ErrorMessage>{errors.email.message}</ErrorMessage>}
         </FormProvider>
       </form>
     </SigninContainer>
