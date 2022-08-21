@@ -8,7 +8,7 @@ import * as zod from 'zod'
 import { FormProvider, useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useNavigate } from 'react-router-dom'
-import { useContext } from 'react'
+import { useContext, useEffect } from 'react'
 import { WordsContext } from '../../contexts/WordsContext'
 
 const newSignupFormValidationSchema = zod.object({
@@ -23,8 +23,14 @@ const newSignupFormValidationSchema = zod.object({
 type NewSignupFormData = zod.infer<typeof newSignupFormValidationSchema>
 
 export function Signup() {
-  const { signup } = useContext(WordsContext)
+  const { signup, bearerToken } = useContext(WordsContext)
   const navigate = useNavigate()
+
+  useEffect(() => {
+    if (bearerToken) {
+      navigate('/')
+    }
+  })
 
   const newSignupForm = useForm<NewSignupFormData>({
     resolver: zodResolver(newSignupFormValidationSchema),

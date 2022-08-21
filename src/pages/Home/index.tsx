@@ -11,7 +11,6 @@ export function Home() {
 
   useEffect(() => {
     if (!bearerToken) {
-      console.log(bearerToken)
       navigate('/signin')
     }
   })

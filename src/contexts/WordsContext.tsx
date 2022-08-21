@@ -1,5 +1,5 @@
 import axios from 'axios'
-import { createContext, ReactNode, useState } from 'react'
+import { createContext, ReactNode, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { api } from '../lib/axios'
 
@@ -7,6 +7,7 @@ interface SigninInput {
   email: string
   password: string
 }
+
 interface SignupInput {
   name: string
   email: string
@@ -17,7 +18,13 @@ interface WordContextType {
   signin: (data: SigninInput) => Promise<boolean>
   signup: (data: SignupInput) => Promise<boolean>
   signout: () => void
+  searchWords: (query: string, page: number) => Promise<void>
+  fetchHistory: (page: number) => Promise<void>
+  fetchFavorites: (page: number) => Promise<void>
   bearerToken: string | null
+  words: string[]
+  favorites: string[]
+  historic: string[]
 }
 
 interface WordsProviderProps {
@@ -28,6 +35,24 @@ export const WordsContext = createContext({} as WordContextType)
 
 export function WordsProvider({ children }: WordsProviderProps) {
   const [bearerToken, setBearerToken] = useState<string | null>(null)
+  const [words, setWords] = useState<string[]>([])
+  const [favorites, setFavorites] = useState<string[]>([])
+  const [historic, setHistoric] = useState<string[]>([])
+
+  useEffect(() => {
+    const token = localStorage.getItem(
+      '@ignite-timer:dictionary-front-end-1.0.0',
+    )
+    console.log(token)
+    if (token) {
+      setBearerToken(token)
+    }
+  }, [])
+
+  function saveToken(token: string) {
+    localStorage.setItem('@ignite-timer:dictionary-front-end-1.0.0', token)
+    setBearerToken(token)
+  }
 
   function signout() {
     setBearerToken(null)
@@ -49,7 +74,7 @@ export function WordsProvider({ children }: WordsProviderProps) {
       })
 
     if (response && response.data.token) {
-      setBearerToken(response.data.token)
+      saveToken(response.data.token)
       return true
     } else {
       return false
@@ -73,11 +98,47 @@ export function WordsProvider({ children }: WordsProviderProps) {
       })
 
     if (response && response.data.token) {
-      setBearerToken(response.data.token)
+      saveToken(response.data.token)
       return true
     } else {
       return false
     }
+  }
+
+  async function searchWords(query: string, page: number) {
+    api
+      .get('/entries/en/', {
+        params: { search: query, limit: 100, page },
+        headers: { Authorization: `bearer ${bearerToken}` },
+      })
+      .then((res) => {
+        console.log(res.data)
+        setWords(res.data.results)
+      })
+  }
+
+  async function fetchHistory(page: number) {
+    api
+      .get('/user/me/history', {
+        params: { page },
+        headers: { Authorization: `bearer ${bearerToken}` },
+      })
+      .then((res) => {
+        const history = res.data.results.map((item: any) => item.word)
+        setHistoric(history)
+      })
+  }
+
+  async function fetchFavorites(page: number) {
+    api
+      .get('/user/me/favorites', {
+        params: { page },
+        headers: { Authorization: `bearer ${bearerToken}` },
+      })
+      .then((res) => {
+        const favorites = res.data.results.map((item: any) => item.word)
+        setFavorites(res.data.results)
+      })
   }
 
   return (
@@ -85,8 +146,14 @@ export function WordsProvider({ children }: WordsProviderProps) {
       value={{
         signin,
         signup,
+        searchWords,
         bearerToken,
         signout,
+        words,
+        favorites,
+        historic,
+        fetchHistory,
+        fetchFavorites,
       }}
     >
       {children}

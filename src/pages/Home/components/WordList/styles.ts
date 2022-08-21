@@ -2,7 +2,9 @@ import styled from 'styled-components'
 
 export const WordListContainer = styled.div`
   display: flex;
+  flex-direction: column;
 `
+
 export const TabContents = styled.div`
   border: 1px solid black;
   padding: 0.25rem;
