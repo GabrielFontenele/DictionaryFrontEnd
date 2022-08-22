@@ -10,7 +10,8 @@ Web application to consume and display the [DictionaryApi](https://github.com/Ga
 - React hook form
 
 ### Setup
-Run the [DictionaryApi](https://github.com/GabrielFontenele/DictionaryApi) 
+Run the [DictionaryApi](https://github.com/GabrielFontenele/DictionaryApi)
+Set the api baseUrl on the [Axios config file](src/lib/axios)
 Start the frontend server:
 
 ```
