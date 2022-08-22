@@ -32,8 +32,8 @@ export function Signin() {
   const newSigninForm = useForm<NewSigninFormData>({
     resolver: zodResolver(newSigninFormValidationSchema),
     defaultValues: {
-      email: 'example@email.com',
-      password: 'test',
+      email: '',
+      password: '',
     },
   })
 
