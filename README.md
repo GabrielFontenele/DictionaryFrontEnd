@@ -11,7 +11,7 @@ Web application to consume and display the [DictionaryApi](https://github.com/Ga
 
 ### Setup
 Run the [DictionaryApi](https://github.com/GabrielFontenele/DictionaryApi) 
-Start the frontend :server
+Start the frontend server:
 
 ```
 npm run dev
