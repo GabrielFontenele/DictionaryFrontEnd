@@ -24,7 +24,7 @@ export function Search() {
   const { handleSubmit, register } = newSearchForm
 
   async function handleSearch({ query }: NewSearchFormData) {
-    await searchWords(query, 1)
+    await searchWords(query, true)
   }
 
   return (

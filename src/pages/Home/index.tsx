@@ -51,7 +51,6 @@ export function Home() {
           <Star onClick={handleSaveFavorite} size={35} />
         )}
 
-        {wordDefinition?.favorite ? 'true' : 'false'}
         <WordText>
           <span>{wordDefinition?.word}</span>
           <span>{wordDefinition?.phonetic}</span>

@@ -21,24 +21,28 @@ interface WordDefinition {
   favorite: boolean
 }
 
-interface pagination {
+interface Pagination {
   words: string[]
-  next: boolean
+  length: number
+  page: number
+  hasMore: true
+  query?: string
 }
 
 interface WordContextType {
   signin: (data: SigninInput) => Promise<boolean>
   signup: (data: SignupInput) => Promise<boolean>
   signout: () => void
-  searchWords: (query: string, page: number) => Promise<void>
-  fetchHistory: (page: number) => Promise<void>
-  fetchFavorites: (page: number) => Promise<void>
+  searchWords: (query: string, refresh: boolean) => Promise<void>
+  fetchMoreWords: () => void
+  fetchHistory: (refresh: boolean) => Promise<void>
+  fetchFavorites: (refresh: boolean) => Promise<void>
   fetchWord: (query: string) => Promise<void>
   saveFavorite: () => Promise<void>
   bearerToken: string | null
-  words: pagination | null
-  favorites: pagination | null
-  historic: pagination | null
+  words: Pagination | null
+  favorites: Pagination | null
+  historic: Pagination | null
   wordDefinition: WordDefinition | null
 }
 
@@ -55,15 +59,14 @@ export function WordsProvider({ children }: WordsProviderProps) {
     null,
   )
 
-  const [words, setWords] = useState<pagination | null>(null)
-  const [favorites, setFavorites] = useState<pagination | null>(null)
-  const [historic, setHistoric] = useState<pagination | null>(null)
+  const [words, setWords] = useState<Pagination | null>(null)
+  const [favorites, setFavorites] = useState<Pagination | null>(null)
+  const [historic, setHistoric] = useState<Pagination | null>(null)
 
   useEffect(() => {
     const token = localStorage.getItem(
       '@ignite-timer:dictionary-front-end-1.0.0',
     )
-    console.log(token)
     if (token) {
       setBearerToken(token)
     }
@@ -125,51 +128,78 @@ export function WordsProvider({ children }: WordsProviderProps) {
     }
   }
 
-  async function searchWords(query: string, page: number) {
+  async function searchWords(query: string, refresh: boolean) {
+    const page = !refresh && words ? words.page + 1 : 1
+
     api
       .get('/entries/en/', {
         params: { search: query, limit: 100, page },
         headers: { Authorization: `bearer ${bearerToken}` },
       })
       .then((res) => {
-        const p: pagination = {
-          words: res.data.results,
-          next: res.data.hasNext,
-        }
-        setWords(p)
+        setWords((state) => {
+          const newWords =
+            !refresh && state
+              ? state.words.concat(res.data.results)
+              : res.data.results
+          return {
+            words: newWords,
+            length: newWords.length,
+            page: res.data.page,
+            hasMore: res.data.hasNext,
+            query,
+          }
+        })
       })
   }
 
-  async function fetchHistory(page: number) {
+  function fetchMoreWords() {
+    if (words?.query) searchWords(words.query, false)
+  }
+
+  async function fetchHistory(refresh: boolean) {
+    const page = !refresh && historic ? historic.page + 1 : 1
     api
       .get('/user/me/history', {
         params: { page },
         headers: { Authorization: `bearer ${bearerToken}` },
       })
       .then((res) => {
-        const history = res.data.results.map((item: any) => item.word)
+        const newHistory = res.data.results.map((item: any) => item.word)
 
-        const p: pagination = {
-          words: history,
-          next: res.data.hasNext,
-        }
-        setHistoric(p)
+        setHistoric((state) => {
+          const newWords =
+            !refresh && state ? state.words.concat(newHistory) : newHistory
+          return {
+            words: newWords,
+            length: newWords.length,
+            page: res.data.page,
+            hasMore: res.data.hasNext,
+          }
+        })
       })
   }
 
-  async function fetchFavorites(page: number) {
+  async function fetchFavorites(refresh: boolean) {
+    const page = !refresh && favorites ? favorites.page + 1 : 1
     api
       .get('/user/me/favorites', {
         params: { page },
         headers: { Authorization: `bearer ${bearerToken}` },
       })
       .then((res) => {
-        const favorites = res.data.results.map((item: any) => item.word)
-        const p: pagination = {
-          words: favorites,
-          next: res.data.hasNext,
-        }
-        setFavorites(p)
+        const newFavorites = res.data.results.map((item: any) => item.word)
+
+        setFavorites((state) => {
+          const newWords =
+            !refresh && state ? state.words.concat(newFavorites) : newFavorites
+          return {
+            words: newWords,
+            length: newWords.length,
+            page: res.data.page,
+            hasMore: res.data.hasNext,
+          }
+        })
       })
   }
 
@@ -201,8 +231,10 @@ export function WordsProvider({ children }: WordsProviderProps) {
             )
           })
         })
+        console.log(favorites)
 
         favorites?.words.forEach((favorite) => {
+          console.log(favorite)
           if (wordResponse.word === favorite) wordDefinition.favorite = true
         })
 
@@ -225,7 +257,7 @@ export function WordsProvider({ children }: WordsProviderProps) {
               }
               return null
             })
-            fetchFavorites(1)
+            fetchFavorites(true)
           })
       } else {
         api
@@ -243,7 +275,7 @@ export function WordsProvider({ children }: WordsProviderProps) {
               }
               return null
             })
-            fetchFavorites(1)
+            fetchFavorites(true)
           })
       }
     }
@@ -256,6 +288,7 @@ export function WordsProvider({ children }: WordsProviderProps) {
         signup,
         signout,
         searchWords,
+        fetchMoreWords,
         fetchHistory,
         fetchFavorites,
         fetchWord,

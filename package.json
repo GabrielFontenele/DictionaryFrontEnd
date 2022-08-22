@@ -18,6 +18,7 @@
     "react-audio-player": "^0.17.0",
     "react-dom": "^18.2.0",
     "react-hook-form": "^7.34.2",
+    "react-infinite-scroll-component": "^6.1.0",
     "react-router-dom": "^6.3.0",
     "styled-components": "^5.3.5",
     "zod": "^3.18.0"

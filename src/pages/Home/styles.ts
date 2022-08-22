@@ -21,6 +21,7 @@ export const HomeContainer = styled.div`
 export const WordContent = styled.div`
   /* border: 1px solid black; */
   height: 25rem;
+  max-width: 19rem;
   display: flex;
   align-items: center;
   justify-content: center;

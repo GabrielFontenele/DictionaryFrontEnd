@@ -1,5 +1,5 @@
 import styled from 'styled-components'
-
+import InfiniteScroll from 'react-infinite-scroll-component'
 export const WordListContainer = styled.div`
   display: flex;
   flex-direction: column;
@@ -41,15 +41,16 @@ export const WordTable = styled.div`
   grid-template-columns: repeat(4, minmax(min-content, 50px));
   border-top: 1px solid black;
   border-left: 1px solid black;
-
-  span {
-    cursor: pointer;
-    padding: 5px;
-    text-align: center;
-    border-bottom: 1px solid black;
-    border-right: 1px solid black;
-    &:hover {
-      background-color: ${(props) => props.theme['gray-100']};
-    }
+`
+export const WordSpan = styled.span`
+  cursor: pointer;
+  /* min-width: 5rem; */
+  flex: 1 0 21%;
+  padding: 5px;
+  text-align: center;
+  border-bottom: 1px solid black;
+  border-right: 1px solid black;
+  &:hover {
+    background-color: ${(props) => props.theme['gray-100']};
   }
 `
