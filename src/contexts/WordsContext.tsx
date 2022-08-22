@@ -231,10 +231,8 @@ export function WordsProvider({ children }: WordsProviderProps) {
             )
           })
         })
-        console.log(favorites)
 
         favorites?.words.forEach((favorite) => {
-          console.log(favorite)
           if (wordResponse.word === favorite) wordDefinition.favorite = true
         })
 
