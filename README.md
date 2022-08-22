@@ -1,7 +1,7 @@
-#Dictionary Front End
+# Dictionary Front End
 Web application to consume and display the [DictionaryApi](https://github.com/GabrielFontenele/DictionaryApi) 
 
-###Frameworks
+### Frameworks
 - Typescript
 - React
 - Vite
@@ -9,7 +9,7 @@ Web application to consume and display the [DictionaryApi](https://github.com/Ga
 - Zod
 - React hook form
 
-###Setup
+### Setup
 Run the [DictionaryApi](https://github.com/GabrielFontenele/DictionaryApi) 
 Start the frontend :server
 
